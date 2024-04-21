@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     }
 
     p = argv[1];
-    int seconds = atoi(p);
+    int seconds = atoi(p); // NOLINT
     sleep(seconds);
     exit(0);
 }
