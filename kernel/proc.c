@@ -163,7 +163,7 @@ freeproc(struct proc *p) {
 
     // Free usyscall page.
     if (p->usyscall) {
-        kfree((void *) p->trapframe);
+        kfree((void *) p->usyscall);
     }
     p->usyscall = 0;
 
