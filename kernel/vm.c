@@ -449,3 +449,40 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return -1;
   }
 }
+
+void vmsprint(pagetable_t page_table, int depth) {
+    // There are 2^9 = 512 PTEs in a page table.
+    int pte_numbers = 512;
+    for (int i = 0; i < pte_numbers; i++) {
+        pte_t pte = page_table[i];
+        if (pte & PTE_V) {  // Don't print PTEs that are not valid.
+            for (int j = 0; j < depth; j++) {
+                printf(".. ");
+            }
+            uint64 pa = PTE2PA(pte);
+            printf("..%d: pte %p pa %p\n", i, pte, pa);
+            // xv6 has three-level page table, means the max depth is 2.
+            if (depth < 2) {
+                vmsprint((pagetable_t) pa, depth + 1);
+            }
+        }
+    }
+}
+
+/**
+ * @brief Prints the content of a page table.
+ *
+ * The first line displays the argument to vmprint.
+ * After that there is a line for each PTE, including PTEs that refer to page-table pages deeper in the tree.
+ * Each PTE line is indented by a number of " .." that indicates its depth in the tree.
+ * Each PTE line shows the PTE index in its page-table page, the pte bits, and the physical address extracted from the PTE.
+ * Don't print PTEs that are not valid.
+ * In the above example, the top-level page-table page has mappings for entries 0 and 255.
+ * The next level down for entry 0 has only index 0 mapped, and the bottom-level for that index 0 has entries 0, 1, and 2 mapped
+ *
+ * @param page_table The page table to print.
+ */
+void vmprint(pagetable_t page_table) {
+    printf("page table %p\n", page_table);
+    vmsprint(page_table, 0);
+}
