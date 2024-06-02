@@ -75,6 +75,27 @@ int
 sys_pgaccess(void)
 {
   // lab pgtbl: your code here.
+  pagetable_t u_page_table = myproc()->pagetable;
+  uint64 first_addr, mask_addr;
+  int check_size;
+  uint mask = 0;
+  argaddr(0, &first_addr);
+  argint(1, &check_size);
+  argaddr(2, &mask_addr);
+
+  // If the size is too big to store in mask addr.
+  if (check_size > 32) {
+      return -1;
+  }
+
+  pte_t *first_pte = walk(u_page_table, first_addr, 0);
+  for (int i = 0; i < check_size; i++) {
+      if ((first_pte[i] & PTE_V) && (first_pte[i] & PTE_A)) {
+          mask |= (1 << i);
+          first_pte[i] ^= PTE_A; // reset
+      }
+  }
+  copyout(u_page_table, mask_addr, (char*)&mask, sizeof(uint));
   return 0;
 }
 #endif
